@@ -1,4 +1,6 @@
 # FNA WASM threaded on .NET 9
+A template for FNA games with threads. Using OPFS for file storage is also supported, OPFS is mounted at `/libsdl` in the WASM fs.
 
-Run `make statics serve`
-Clone fna 24.05 in a parent directory and apply FNA.patch.
+## Usage
+- Clone fna 24.01 in a parent directory and apply FNA.patch.
+- Run `make serve`
