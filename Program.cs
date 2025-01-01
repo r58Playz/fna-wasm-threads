@@ -1,8 +1,11 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 
-Console.WriteLine("Hello, Browser!");
+[assembly: System.Runtime.Versioning.SupportedOSPlatform("browser")]
 
 public class FNAGame : Game
 {
@@ -80,17 +83,60 @@ public class FNAGame : Game
     }
 }
 
-#nullable enable
-partial class Main
+partial class Program
 {
-	static Game? game;
+    private static void Main()
+    {
+        Console.WriteLine("Hi!");
+    }
 
-	[JSExport]
-	internal static void MainLoop() {
-		if (game == null) {
-			game = new FNAGame();
-		}
-		game.RunOneFrame();
-	}
+    [DllImport("Emscripten")]
+    public extern static int mount_opfs();
+
+    static FNAGame game;
+    public static bool firstLaunch = true;
+
+    [JSExport]
+    internal static Task PreInit()
+    {
+        return Task.Run(() =>
+        {
+            Console.WriteLine("calling mount_opfs");
+            int ret = mount_opfs();
+            Console.WriteLine($"called mount_opfs: {ret}");
+            if (ret != 0)
+            {
+                throw new Exception("Failed to mount OPFS");
+            }
+        });
+    }
+
+    [JSExport]
+    internal static void Init()
+    {
+		// Any init for the Game - usually before game.Run() in the decompilation
+        game = new FNAGame();
+    }
+
+    [JSExport]
+    internal static void Cleanup()
+    {
+		// Any cleanup for the Game - usually after game.Run() in the decompilation
+    }
+
+    [JSExport]
+    internal static bool MainLoop()
+    {
+        try
+        {
+            game.RunOneFrame();
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine("Error in MainLoop()!");
+            Console.Error.WriteLine(e);
+            throw;
+        }
+        return game.RunApplication;
+    }
 }
-#nullable disable

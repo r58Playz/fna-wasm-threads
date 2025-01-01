@@ -1,34 +1,44 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 
-import { dotnet } from './_framework/dotnet.js'
+const wasm = await eval(`import("/_framework/dotnet.js")`);
+const dotnet = wasm.dotnet;
 
-const runtime = await dotnet
-	.withConfig({
-		jsThreadBlockingMode: "DangerousAllowBlockingWait",
-	})
-	.create();
+console.debug("initializing dotnet");
+const runtime = await dotnet.withConfig({
+	jsThreadBlockingMode: "DangerousAllowBlockingWait",
+}).create();
+
 const config = runtime.getConfig();
 const exports = await runtime.getAssemblyExports(config.mainAssemblyName);
-
 const canvas = document.getElementById("canvas");
 dotnet.instance.Module.canvas = canvas;
 
-window.wasm = {
+self.wasm = {
+	Module: dotnet.instance.Module,
 	dotnet,
 	runtime,
 	config,
 	exports,
-	canvas
+	canvas,
 };
 
-const loop = () => {
-	try {
-		exports.Main.MainLoop();
-	} catch(err) {
-		console.error("err", err);
+console.debug("PreInit...");
+await runtime.runMain();
+await exports.Program.PreInit();
+console.debug("dotnet initialized");
+
+console.debug("Init...");
+exports.Program.Init();
+
+console.debug("MainLoop...");
+const main = () => {
+	const ret = exports.Program.MainLoop();
+
+	if (!ret) {
+		console.debug("Cleanup...");
+		exports.Program.Cleanup();
 		return;
 	}
-	requestAnimationFrame(loop);
+
+	requestAnimationFrame(main);
 }
-requestAnimationFrame(loop);
+requestAnimationFrame(main);

@@ -1,4 +1,3 @@
-
 STATICS_RELEASE=9c3dd72e-5785-49f6-b648-cdcbb036fb7d
 
 statics:
@@ -8,8 +7,13 @@ statics:
 	wget https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/libmojoshader.a -O statics/libmojoshader.a
 	wget https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/SDL2.a -O statics/SDL2.a
 
-build:
+clean:
+	rm -rv statics obj bin || true
+
+build: statics
 	dotnet publish -c Release -v d
+	# microsoft messed up
+	sed -i 's/FS_createPath("\/","usr\/share",!0,!0)/FS_createPath("\/usr","share",!0,!0)/' bin/Release/net9.0/publish/wwwroot/_framework/dotnet.runtime.*.js
 
 serve: build
 	python3 tools/serve.py
