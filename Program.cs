@@ -112,20 +112,22 @@ partial class Program
     }
 
     [JSExport]
-    internal static void Init()
+    internal static Task Init()
     {
 		// Any init for the Game - usually before game.Run() in the decompilation
         game = new FNAGame();
+		return Task.Delay(0);
     }
 
     [JSExport]
-    internal static void Cleanup()
+    internal static Task<bool> Cleanup()
     {
 		// Any cleanup for the Game - usually after game.Run() in the decompilation
+		return Task.FromResult(true);
     }
 
     [JSExport]
-    internal static bool MainLoop()
+    internal static Task<bool> MainLoop()
     {
         try
         {
@@ -135,8 +137,8 @@ partial class Program
         {
             Console.Error.WriteLine("Error in MainLoop()!");
             Console.Error.WriteLine(e);
-            throw;
+			return (Task<bool>)Task.FromException(e);
         }
-        return game.RunApplication;
+        return Task.FromResult(game.RunApplication);
     }
 }

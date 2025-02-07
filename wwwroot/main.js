@@ -4,7 +4,6 @@ const dotnet = wasm.dotnet;
 
 console.debug("initializing dotnet");
 const runtime = await dotnet.withConfig({
-	jsThreadBlockingMode: "DangerousAllowBlockingWait",
 }).create();
 
 const config = runtime.getConfig();
@@ -27,15 +26,15 @@ await exports.Program.PreInit();
 console.debug("dotnet initialized");
 
 console.debug("Init...");
-exports.Program.Init();
+await exports.Program.Init();
 
 console.debug("MainLoop...");
-const main = () => {
-	const ret = exports.Program.MainLoop();
+const main = async () => {
+	const ret = await exports.Program.MainLoop();
 
 	if (!ret) {
 		console.debug("Cleanup...");
-		exports.Program.Cleanup();
+		await exports.Program.Cleanup();
 		return;
 	}
 

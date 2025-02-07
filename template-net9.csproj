@@ -5,7 +5,7 @@
 		<EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 		<Nullable>disable</Nullable>
 
-		<RunAOTCompilation>true</RunAOTCompilation>
+		<!--<RunAOTCompilation>true</RunAOTCompilation>-->
 		<DisableBuildCompression>true</DisableBuildCompression>
 		<TrimMode>partial</TrimMode>
 
@@ -23,7 +23,7 @@
 		<WasmStripILAfterAOT>true</WasmStripILAfterAOT>
 		<WasmNativeDebugSymbols>false</WasmNativeDebugSymbols>
 
-		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -Wl,--no-check-features</EmccExtraLDFlags>
+		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -sOFFSCREENCANVAS_SUPPORT -Wl,--no-check-features</EmccExtraLDFlags>
 		<EmccLinkOptimizationFlag>-O3</EmccLinkOptimizationFlag>
 		<EmccCompileOptimizationFlag>-O3</EmccCompileOptimizationFlag>
 		<EmccEnvironment>web,worker</EmccEnvironment>
@@ -34,7 +34,7 @@
 
 	<ItemGroup>
 		<!-- FNA -->
-		<NativeFileReference Include="statics\SDL2.a" />
+		<NativeFileReference Include="statics\SDL3.a" />
 		<NativeFileReference Include="statics\FNA3D.a" />
 		<NativeFileReference Include="statics\libmojoshader.a" />
 		<NativeFileReference Include="statics\FAudio.a" />
