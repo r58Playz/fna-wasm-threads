@@ -1,5 +1,5 @@
 using System;
-using System.Threading;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.InteropServices;
@@ -20,11 +20,11 @@ public class FNAGame : Game
         gdm.SynchronizeWithVerticalRetrace = true;
     }
 
-	byte r = 0;
-	byte g = 0;
-	byte b = 0;
-	DateTime lastUpdate = DateTime.UnixEpoch;
-	int updateCount = 0;
+    byte r = 0;
+    byte g = 0;
+    byte b = 0;
+    DateTime lastUpdate = DateTime.UnixEpoch;
+    int updateCount = 0;
 
     protected override void Initialize()
     {
@@ -50,29 +50,32 @@ public class FNAGame : Game
     {
         // Run game logic in here. Do NOT render anything here!
         base.Update(gameTime);
-		updateCount++;
-		DateTime now = DateTime.UtcNow;
-		if ((now - lastUpdate).TotalSeconds > 1.0)
-		{
-			Console.WriteLine($"Main loop still running at: {now}; {Math.Round(updateCount / (now - lastUpdate).TotalSeconds, MidpointRounding.AwayFromZero)} UPS");
-			lastUpdate = now;
-			updateCount = 0;
-		}
-		if (r != 255) {
-			r++;
-			return;
-		}
-		if (g != 255) {
-			g++;
-			return;
-		}
-		if (b != 255) {
-			b++;
-			return;
-		}
-		r = 0;
-		g = 0;
-		b = 0;
+        updateCount++;
+        DateTime now = DateTime.UtcNow;
+        if ((now - lastUpdate).TotalSeconds > 1.0)
+        {
+            Console.WriteLine($"Main loop still running at: {now}; {Math.Round(updateCount / (now - lastUpdate).TotalSeconds, MidpointRounding.AwayFromZero)} UPS");
+            lastUpdate = now;
+            updateCount = 0;
+        }
+        if (r != 255)
+        {
+            r++;
+            return;
+        }
+        if (g != 255)
+        {
+            g++;
+            return;
+        }
+        if (b != 255)
+        {
+            b++;
+            return;
+        }
+        r = 0;
+        g = 0;
+        b = 0;
     }
 
     protected override void Draw(GameTime gameTime)
@@ -94,6 +97,7 @@ partial class Program
     public extern static int mount_opfs();
 
     static FNAGame game;
+    static FieldInfo RunApplication;
     public static bool firstLaunch = true;
 
     [JSExport]
@@ -108,22 +112,25 @@ partial class Program
             {
                 throw new Exception("Failed to mount OPFS");
             }
+
+            Environment.SetEnvironmentVariable("FNA_PLATFORM_BACKEND", "SDL3");
         });
     }
 
     [JSExport]
     internal static Task Init()
     {
-		// Any init for the Game - usually before game.Run() in the decompilation
+        // Any init for the Game - usually before game.Run() in the decompilation
         game = new FNAGame();
-		return Task.Delay(0);
+		RunApplication = game.GetType().GetField("RunApplication", BindingFlags.NonPublic | BindingFlags.Instance);
+        return Task.Delay(0);
     }
 
     [JSExport]
     internal static Task<bool> Cleanup()
     {
-		// Any cleanup for the Game - usually after game.Run() in the decompilation
-		return Task.FromResult(true);
+        // Any cleanup for the Game - usually after game.Run() in the decompilation
+        return Task.FromResult(true);
     }
 
     [JSExport]
@@ -137,8 +144,8 @@ partial class Program
         {
             Console.Error.WriteLine("Error in MainLoop()!");
             Console.Error.WriteLine(e);
-			return (Task<bool>)Task.FromException(e);
+            return (Task<bool>)Task.FromException(e);
         }
-        return Task.FromResult(game.RunApplication);
+        return Task.FromResult((bool)RunApplication.GetValue(game));
     }
 }
