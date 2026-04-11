@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 		<Nullable>disable</Nullable>
 
 		<!--<RunAOTCompilation>true</RunAOTCompilation>-->
-		<DisableBuildCompression>true</DisableBuildCompression>
+		<CompressionEnabled>false</CompressionEnabled>
 		<TrimMode>partial</TrimMode>
 		<PublishTrimmed>false</PublishTrimmed>
 
@@ -24,14 +24,11 @@
 		<WasmStripILAfterAOT>true</WasmStripILAfterAOT>
 		<WasmNativeDebugSymbols>false</WasmNativeDebugSymbols>
 
-		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -sOFFSCREENCANVAS_SUPPORT -Wl,--no-check-features</EmccExtraLDFlags>
+		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sWASMFS -sOFFSCREENCANVAS_SUPPORT</EmccExtraLDFlags>
 		<EmccLinkOptimizationFlag>-O3</EmccLinkOptimizationFlag>
 		<EmccCompileOptimizationFlag>-O3</EmccCompileOptimizationFlag>
 		<EmccEnvironment>web,worker</EmccEnvironment>
 	</PropertyGroup>
-	<ItemGroup>
-		<WasmOptConfigurationFlags Include="--converge -O4 -Oz"></WasmOptConfigurationFlags>
-	</ItemGroup>
 
 	<ItemGroup>
 		<!-- FNA -->
@@ -45,7 +42,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FNA\FNA.Core.csproj" />
+		<ProjectReference Include=".\FNA\FNA.Core.csproj" />
+		<None Remove=".\FNA\**" />
+		<Compile Remove=".\FNA\**" />
+		<Content Remove=".\FNA\**" />
+		<EmbeddedResource Remove=".\FNA\**" />
 	</ItemGroup>
 </Project>
 

@@ -5,7 +5,7 @@ import sys
 class CORSRequestHandler (SimpleHTTPRequestHandler):
     def translate_path(self, path):
         if path.startswith("/_framework"):
-            return "bin/Release/net9.0/publish/wwwroot/_framework" + path[len("/_framework"):]
+            return "bin/Release/net10.0/publish/wwwroot/_framework" + path[len("/_framework"):]
         else:
             return "wwwroot" + path
 

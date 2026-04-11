@@ -1,4 +1,4 @@
-STATICS_RELEASE=e97620f0-7022-49fe-845e-a28034d5d631
+STATICS_RELEASE=eb111fb8-7474-4f75-a1b7-848fc6293aa5
 
 statics:
 	mkdir statics
@@ -7,15 +7,19 @@ statics:
 	wget https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/libmojoshader.a -O statics/libmojoshader.a
 	wget https://github.com/r58Playz/FNA-WASM-Build/releases/download/$(STATICS_RELEASE)/SDL3.a -O statics/SDL3.a
 
-clean:
-	rm -rv statics obj bin || true
+FNA:
+	git clone https://github.com/FNA-XNA/FNA --recursive -b 26.04
+	cd FNA && git apply ../FNA.patch
 
-build: statics
+clean:
+	rm -rvf statics obj bin FNA || true
+
+build: statics FNA
 	dotnet publish -c Release -v d
-	# microsoft messed up
-	sed -i 's/FS_createPath("\/","usr\/share",!0,!0)/FS_createPath("\/usr","share",!0,!0)/' bin/Release/net9.0/publish/wwwroot/_framework/dotnet.runtime.*.js
-	# emscripten sucks
-	sed -i 's/var offscreenCanvases={};/var offscreenCanvases={};if(globalThis.window\&\&!window.TRANSFERRED_CANVAS){transferredCanvasNames=[".canvas"];window.TRANSFERRED_CANVAS=true;}/' bin/Release/net9.0/publish/wwwroot/_framework/dotnet.native.*.js
+	# fix mono init with -sWASMFS enabled
+	sed -i 's/FS_createPath("\/","usr\/share",!0,!0)/FS_createPath("\/usr","share",!0,!0)/' bin/Release/net10.0/publish/wwwroot/_framework/dotnet.runtime.*.js
+	# automatically force transfer of canvas matching selector `.canvas` (class canvas) to deputy thread (c# managed main thread)
+	sed -i 's/var offscreenCanvases={};/var offscreenCanvases={};if(globalThis.window\&\&!window.TRANSFERRED_CANVAS){transferredCanvasNames=[".canvas"];window.TRANSFERRED_CANVAS=true;}/' bin/Release/net10.0/publish/wwwroot/_framework/dotnet.native.*.js
 
 serve: build
 	python3 tools/serve.py
