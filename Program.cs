@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.InteropServices;
+using System.IO;
 using Microsoft.Xna.Framework;
 
 [assembly: System.Runtime.Versioning.SupportedOSPlatform("browser")]
@@ -121,6 +122,7 @@ partial class Program
     internal static Task Init()
     {
         // Any init for the Game - usually before game.Run() in the decompilation
+		Console.WriteLine($"read test.txt from opfs: {File.ReadAllText("/libsdl/test.txt")}");
         game = new FNAGame();
 		RunApplication = game.GetType().GetField("RunApplication", BindingFlags.NonPublic | BindingFlags.Instance);
         return Task.Delay(0);

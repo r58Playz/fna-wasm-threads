@@ -20,6 +20,13 @@ self.wasm = {
 	canvas,
 };
 
+let opfs = await navigator.storage.getDirectory();
+// writing to opfs will put it at /libsdl/... in c#
+let file = await opfs.getFileHandle("test.txt", { create: true });
+let writable = await file.createWritable();
+await writable.write(new TextEncoder().encode("test data")); // or pipeTo a readablestream from Response.body etc
+await writable.close();
+
 console.debug("PreInit...");
 await runtime.runMain();
 await exports.Program.PreInit();
